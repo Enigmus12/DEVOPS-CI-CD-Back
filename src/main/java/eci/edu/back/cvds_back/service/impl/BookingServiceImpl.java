@@ -27,6 +27,10 @@ public class BookingServiceImpl implements BookingService {
             throw new BookingServiceException("Error: El bookingId '" + bookingDTO.getBookingId() + "' ya existe.");
         }
 
+        if (bookingDTO.getPriority() < 1 || bookingDTO.getPriority() > 5) {
+            throw new BookingServiceException("Error: La prioridad debe estar entre 1 y 5.");
+        }
+
         List<Booking> existingBookings = bookingRepository.findAll();
         LocalDate newDate = bookingDTO.getBookingDate();
         LocalTime newTime = bookingDTO.getBookingTime();

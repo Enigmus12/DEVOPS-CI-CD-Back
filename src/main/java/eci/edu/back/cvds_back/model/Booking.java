@@ -17,14 +17,16 @@ public class Booking {
     private LocalTime bookingTime;
     private boolean disable;
     private String bookingClassRoom;
+    private Integer priority;
 
     @PersistenceCreator
-    public Booking(String bookingId, LocalDate bookingDate,LocalTime bookingTime ,boolean disable, String bookingClassRoom) {
+    public Booking(String bookingId, LocalDate bookingDate,LocalTime bookingTime ,boolean disable, String bookingClassRoom, Integer priority) {
         this.bookingId = bookingId;
         this.bookingDate = bookingDate;
         this.bookingTime = bookingTime;
         this.disable = disable;
         this.bookingClassRoom = bookingClassRoom;
+        this.priority = priority;
     }
 
     public Booking(BookingDTO bookingDTO) {
@@ -33,6 +35,7 @@ public class Booking {
         this.bookingId = bookingDTO.getBookingId();
         this.disable = true;
         this.bookingClassRoom = bookingDTO.getBookingClassRoom();
+        this.priority = bookingDTO.getPriority();
     }
 
 
@@ -50,4 +53,7 @@ public class Booking {
 
     public LocalDate getBookingDate() {return bookingDate;}
     public void setBookingDate(LocalDate bookingDate) {this.bookingDate = bookingDate;}
+
+    public Integer getPriority() {return priority;}
+    public void setPriority(Integer priority) {this.priority = priority;}
 }
