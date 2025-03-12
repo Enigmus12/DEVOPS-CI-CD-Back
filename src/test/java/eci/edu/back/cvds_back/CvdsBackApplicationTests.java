@@ -3,34 +3,26 @@ package eci.edu.back.cvds_back;
 import eci.edu.back.cvds_back.config.BookingServiceException;
 import eci.edu.back.cvds_back.config.UserServiceException;
 import eci.edu.back.cvds_back.controller.BookingController;
+import eci.edu.back.cvds_back.controller.BookingGeneratorController;
 import eci.edu.back.cvds_back.controller.UserController;
 import eci.edu.back.cvds_back.dto.BookingDTO;
 import eci.edu.back.cvds_back.dto.UserDTO;
 import eci.edu.back.cvds_back.model.Booking;
 import eci.edu.back.cvds_back.model.User;
-import eci.edu.back.cvds_back.service.impl.BookingRepositoryImpl;
-import eci.edu.back.cvds_back.service.impl.BookingServiceImpl;
-import eci.edu.back.cvds_back.service.impl.UserRepositoryImpl;
-import eci.edu.back.cvds_back.service.impl.UserServiceImpl;
-import eci.edu.back.cvds_back.service.interfaces.BookingMongoRepository;
-import eci.edu.back.cvds_back.service.interfaces.BookingRepository;
-import eci.edu.back.cvds_back.service.interfaces.BookingService;
-import eci.edu.back.cvds_back.service.interfaces.UserMongoRepository;
-import eci.edu.back.cvds_back.service.interfaces.UserRepository;
-import eci.edu.back.cvds_back.service.interfaces.UserService;
+import eci.edu.back.cvds_back.service.impl.*;
+import eci.edu.back.cvds_back.service.interfaces.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -86,6 +78,14 @@ public class CvdsBackApplicationTests {
 	private User user;
 	private List<User> userList;
 
+	// Mocks y componentes para pruebas de BookingGenerator
+	@Mock
+	private BookingGeneratorService mockBookingGeneratorService;
+	@InjectMocks
+	private BookingGeneratorController bookingGeneratorController;
+	@InjectMocks
+	private BookingGeneratorServiceImpl bookingGeneratorService;
+
 	@BeforeEach
 	void setUp() throws BookingServiceException {
 		// Initialize Mockito annotations
@@ -122,6 +122,14 @@ public class CvdsBackApplicationTests {
 		ReflectionTestUtils.setField(bookingService, "bookingRepository", mockBookingRepository);
 		ReflectionTestUtils.setField(bookingController, "bookingService", mockBookingService);
 
+		// Configuración para BookingGeneratorService
+		when(mockBookingGeneratorService.generateRandomBookings(anyInt(), anyInt()))
+				.thenReturn(bookingList);
+		when(mockBookingGeneratorService.generateExactBookings(anyInt()))
+				.thenReturn(bookingList);
+		when(mockBookingGeneratorService.clearAllBookings())
+				.thenReturn(1);
+
 		// Configuración inicial para pruebas de User
 		userDTO = new UserDTO();
 		userDTO.setId("user123");
@@ -146,6 +154,11 @@ public class CvdsBackApplicationTests {
 		// Configure with ReflectionTestUtils
 		ReflectionTestUtils.setField(userService, "userRepository", mockUserRepository);
 		ReflectionTestUtils.setField(userController, "userService", mockUserService);
+
+		// Inyección del mock en el controlador
+		ReflectionTestUtils.setField(bookingGeneratorController, "bookingGeneratorService", mockBookingGeneratorService);
+		// Set BookingService mock in BookingGeneratorServiceImpl
+		ReflectionTestUtils.setField(bookingGeneratorService, "bookingService", mockBookingService);
 	}
 	// Tests para BookingRepositoryImpl
 	@Test
@@ -232,6 +245,7 @@ public class CvdsBackApplicationTests {
 		newBookingDTO.setBookingDate(LocalDate.now());
 		newBookingDTO.setBookingTime(LocalTime.of(15, 30));
 		newBookingDTO.setBookingClassRoom("Sala B");
+		newBookingDTO.setPriority(2);
 
 		Booking result = bookingService.saveBooking(newBookingDTO);
 		assertNotNull(result);
@@ -257,7 +271,7 @@ public class CvdsBackApplicationTests {
 		LocalTime time1 = LocalTime.of(10, 0); // 10:00 AM
 		String classRoom = "Sala A";
 
-		Booking existingBooking = new Booking("existing123", today, time1, false, classRoom);
+		Booking existingBooking = new Booking("existing123", today, time1, false, classRoom,2);
 
 		List<Booking> existingBookings = new ArrayList<>();
 		existingBookings.add(existingBooking);
@@ -268,6 +282,7 @@ public class CvdsBackApplicationTests {
 		newBookingDTO.setBookingDate(today);
 		newBookingDTO.setBookingTime(LocalTime.of(13, 0)); // 1:00 PM (3 horas después)
 		newBookingDTO.setBookingClassRoom(classRoom); // Mismo salón
+		newBookingDTO.setPriority(2);
 
 		// Configurar comportamiento del mock
 		when(mockBookingRepository.existsById("new123")).thenReturn(false);
@@ -283,6 +298,7 @@ public class CvdsBackApplicationTests {
 		assertEquals(LocalTime.of(13, 0), result.getBookingTime());
 		assertEquals(classRoom, result.getBookingClassRoom());
 		assertTrue(result.isDisable()); // Por defecto es true según el constructor
+		assertEquals(2,result.getPriority());
 		verify(mockBookingRepository).save(any(Booking.class));
 	}
 
@@ -293,7 +309,7 @@ public class CvdsBackApplicationTests {
 		LocalTime time1 = LocalTime.of(10, 0); // 10:00 AM
 		String classRoom = "Sala A";
 
-		Booking existingBooking = new Booking("existing123", today, time1, false, classRoom);
+		Booking existingBooking = new Booking("existing123", today, time1, false, classRoom,3);
 
 		List<Booking> existingBookings = new ArrayList<>();
 		existingBookings.add(existingBooking);
@@ -304,6 +320,7 @@ public class CvdsBackApplicationTests {
 		newBookingDTO.setBookingDate(today);
 		newBookingDTO.setBookingTime(LocalTime.of(11, 30)); // 11:30 AM (1.5 horas después)
 		newBookingDTO.setBookingClassRoom(classRoom); // Mismo salón
+		newBookingDTO.setPriority(3);
 
 		// Configurar comportamiento del mock
 		when(mockBookingRepository.existsById("new123")).thenReturn(false);
@@ -328,7 +345,7 @@ public class CvdsBackApplicationTests {
 		LocalTime time1 = LocalTime.of(10, 0); // 10:00 AM
 		String classRoomA = "Sala A";
 
-		Booking existingBooking = new Booking("existing123", today, time1, false, classRoomA);
+		Booking existingBooking = new Booking("existing123", today, time1, false, classRoomA,4);
 
 		List<Booking> existingBookings = new ArrayList<>();
 		existingBookings.add(existingBooking);
@@ -340,6 +357,7 @@ public class CvdsBackApplicationTests {
 		newBookingDTO.setBookingDate(today);
 		newBookingDTO.setBookingTime(LocalTime.of(10, 30)); // 10:30 AM (menos de 2 horas después)
 		newBookingDTO.setBookingClassRoom(classRoomB); // Diferente salón
+		newBookingDTO.setPriority(4);
 
 		// Configurar comportamiento del mock
 		when(mockBookingRepository.existsById("new123")).thenReturn(false);
@@ -355,6 +373,7 @@ public class CvdsBackApplicationTests {
 		assertEquals(LocalTime.of(10, 30), result.getBookingTime());
 		assertEquals(classRoomB, result.getBookingClassRoom());
 		assertTrue(result.isDisable()); // Por defecto es true según el constructor
+		assertEquals(4,result.getPriority());
 		verify(mockBookingRepository).save(any(Booking.class));
 	}
 
@@ -365,7 +384,7 @@ public class CvdsBackApplicationTests {
 		LocalTime time1 = LocalTime.of(10, 0); // 10:00 AM
 		String classRoom = "Sala A";
 
-		Booking existingBooking = new Booking("existing123", today, time1, false, classRoom);
+		Booking existingBooking = new Booking("existing123", today, time1, false, classRoom,5);
 
 		List<Booking> existingBookings = new ArrayList<>();
 		existingBookings.add(existingBooking);
@@ -377,6 +396,7 @@ public class CvdsBackApplicationTests {
 		newBookingDTO.setBookingDate(tomorrow); // Día siguiente
 		newBookingDTO.setBookingTime(time1); // Mismo horario
 		newBookingDTO.setBookingClassRoom(classRoom); // Mismo salón
+		newBookingDTO.setPriority(5);
 
 		// Configurar comportamiento del mock
 		when(mockBookingRepository.existsById("new123")).thenReturn(false);
@@ -392,6 +412,7 @@ public class CvdsBackApplicationTests {
 		assertEquals(time1, result.getBookingTime());
 		assertEquals(classRoom, result.getBookingClassRoom());
 		assertTrue(result.isDisable()); // Por defecto es true según el constructor
+		assertEquals(5,result.getPriority());
 		verify(mockBookingRepository).save(any(Booking.class));
 	}
 
@@ -402,7 +423,7 @@ public class CvdsBackApplicationTests {
 		LocalTime time1 = LocalTime.of(14, 0); // 2:00 PM
 		String classRoom = "Sala A";
 
-		Booking existingBooking = new Booking("existing123", today, time1, false, classRoom);
+		Booking existingBooking = new Booking("existing123", today, time1, false, classRoom,1);
 
 		List<Booking> existingBookings = new ArrayList<>();
 		existingBookings.add(existingBooking);
@@ -413,6 +434,7 @@ public class CvdsBackApplicationTests {
 		newBookingDTO.setBookingDate(today);
 		newBookingDTO.setBookingTime(LocalTime.of(11, 0)); // 11:00 AM (3 horas antes)
 		newBookingDTO.setBookingClassRoom(classRoom); // Mismo salón
+		newBookingDTO.setPriority(1);
 
 		// Configurar comportamiento del mock
 		when(mockBookingRepository.existsById("new123")).thenReturn(false);
@@ -434,7 +456,7 @@ public class CvdsBackApplicationTests {
 		LocalTime time1 = LocalTime.of(14, 0); // 2:00 PM
 		String classRoom = "Sala A";
 
-		Booking existingBooking = new Booking("existing123", today, time1, false, classRoom);
+		Booking existingBooking = new Booking("existing123", today, time1, false, classRoom,2);
 
 		List<Booking> existingBookings = new ArrayList<>();
 		existingBookings.add(existingBooking);
@@ -445,6 +467,7 @@ public class CvdsBackApplicationTests {
 		newBookingDTO.setBookingDate(today);
 		newBookingDTO.setBookingTime(LocalTime.of(13, 0)); // 1:00 PM (1 hora antes)
 		newBookingDTO.setBookingClassRoom(classRoom); // Mismo salón
+		newBookingDTO.setPriority(2);
 
 		// Configurar comportamiento del mock
 		when(mockBookingRepository.existsById("new123")).thenReturn(false);
@@ -459,6 +482,42 @@ public class CvdsBackApplicationTests {
 		assertEquals("Error: No se puede reservar en el mismo salón dentro de un intervalo de 2 horas.", exception.getMessage());
 
 		// Verificar que nunca se llamó al método save
+		verify(mockBookingRepository, never()).save(any(Booking.class));
+	}
+
+	@Test
+	void testSaveBookingWithInvalidPriority() throws BookingServiceException {
+		// Create a BookingDTO with invalid priority values
+
+		// Test with priority below minimum (less than 1)
+		BookingDTO lowPriorityDTO = new BookingDTO();
+		lowPriorityDTO.setBookingId("testPriority1");
+		lowPriorityDTO.setBookingDate(LocalDate.now());
+		lowPriorityDTO.setBookingTime(LocalTime.of(10, 0));
+		lowPriorityDTO.setBookingClassRoom("Sala B");
+		lowPriorityDTO.setPriority(0); // Invalid priority (below 1)
+
+		// Assert that calling saveBooking with a priority below 1 throws exception
+		BookingServiceException lowPriorityException = assertThrows(BookingServiceException.class, () -> {
+			bookingService.saveBooking(lowPriorityDTO);
+		});
+		assertEquals("Error: La prioridad debe estar entre 1 y 5.", lowPriorityException.getMessage());
+
+		// Test with priority above maximum (more than 5)
+		BookingDTO highPriorityDTO = new BookingDTO();
+		highPriorityDTO.setBookingId("testPriority2");
+		highPriorityDTO.setBookingDate(LocalDate.now());
+		highPriorityDTO.setBookingTime(LocalTime.of(10, 0));
+		highPriorityDTO.setBookingClassRoom("Sala B");
+		highPriorityDTO.setPriority(6); // Invalid priority (above 5)
+
+		// Assert that calling saveBooking with a priority above 5 throws exception
+		BookingServiceException highPriorityException = assertThrows(BookingServiceException.class, () -> {
+			bookingService.saveBooking(highPriorityDTO);
+		});
+		assertEquals("Error: La prioridad debe estar entre 1 y 5.", highPriorityException.getMessage());
+
+		// Verify that save was never called because validation failed
 		verify(mockBookingRepository, never()).save(any(Booking.class));
 	}
 
@@ -651,19 +710,21 @@ public class CvdsBackApplicationTests {
 
 	@Test
 	void testBookingGettersAndSetters() {
-		Booking booking = new Booking("testId", LocalDate.now(), LocalTime.now(), false, "ClassRoom1");
+		Booking booking = new Booking("testId", LocalDate.now(), LocalTime.now(), false, "ClassRoom1", 1);
 
 		booking.setBookingId("newId");
 		booking.setBookingDate(LocalDate.of(2024, 3, 7));
 		booking.setBookingTime(LocalTime.of(10, 30));
 		booking.setDisable(true);
 		booking.setBookingClassRoom("ClassRoom2"); // Este método no hace nada en la implementación
+		booking.setPriority(1);
 
 		assertEquals("newId", booking.getBookingId());
 		assertEquals(LocalDate.of(2024, 3, 7), booking.getBookingDate());
 		assertEquals(LocalTime.of(10, 30), booking.getBookingTime());
 		assertTrue(booking.isDisable());
 		assertEquals("ClassRoom1", booking.getBookingClassRoom()); // No cambia porque el setter está vacío
+		assertEquals(1, booking.getPriority());
 	}
 
 	// Test para BookingServiceException
@@ -860,26 +921,24 @@ public class CvdsBackApplicationTests {
 	}
 
 	// Test main
-
 	@Test
 	void contextLoads() {
-		assertTrue(true);
+		// Esta prueba verifica que el contexto de Spring se carga correctamente
+		// Lo que implícitamente prueba la clase CvdsBackApplication
+		CvdsBackApplication application = new CvdsBackApplication();
+		assertNotNull(application);
 	}
 
 	@Test
 	void testMainMethod() {
-		// Instead of calling the main method directly, we'll mock the SpringApplication class
 		try (MockedStatic<SpringApplication> mocked = Mockito.mockStatic(SpringApplication.class)) {
-			// Set up the mock to do nothing when run is called
 			mocked.when(() -> SpringApplication.run(
 							CvdsBackApplication.class,
 							new String[]{}))
 					.thenReturn(null);
 
-			// Now call the main method
 			CvdsBackApplication.main(new String[]{});
 
-			// Verify that SpringApplication.run was called with the correct parameters
 			mocked.verify(() -> SpringApplication.run(
 							CvdsBackApplication.class,
 							new String[]{}),
@@ -887,18 +946,227 @@ public class CvdsBackApplicationTests {
 		}
 	}
 
+	// Tests para BookingGeneratorController
 	@Test
-	void testApplicationAnnotations() {
-		// Verify the application class has the required annotations
-		Class<?> appClass = CvdsBackApplication.class;
+	void testGenerateBookings() {
+		ResponseEntity<Map<String, Object>> response = bookingGeneratorController.generateBookings(10, 20);
 
-		// Check for @SpringBootApplication annotation
-		assertTrue(appClass.isAnnotationPresent(SpringBootApplication.class),
-				"Application class should have @SpringBootApplication annotation");
+		assertNotNull(response);
+		assertEquals(200, response.getStatusCodeValue());
 
-		// Check for @EnableMongoRepositories annotation
-		assertTrue(appClass.isAnnotationPresent(EnableMongoRepositories.class),
-				"Application class should have @EnableMongoRepositories annotation");
+		Map<String, Object> body = response.getBody();
+		assertNotNull(body);
+		assertEquals("Successfully generated 1 bookings", body.get("message"));
+		assertEquals(1, body.get("totalGenerated"));
+
+		verify(mockBookingGeneratorService).generateRandomBookings(10, 20);
 	}
 
+	// Test para valores por defecto en los parámetros
+	@Test
+	void testGenerateBookingsWithDefaultValues() {
+		ResponseEntity<Map<String, Object>> response = bookingGeneratorController.generateBookings(100, 1000);
+
+		assertNotNull(response);
+		assertEquals(200, response.getStatusCodeValue());
+		verify(mockBookingGeneratorService).generateRandomBookings(100, 1000);
+	}
+
+	@Test
+	void testGenerateExactBookingsWithDefaultValue() {
+		ResponseEntity<Map<String, Object>> response = bookingGeneratorController.generateExactBookings(100);
+
+		assertNotNull(response);
+		assertEquals(200, response.getStatusCodeValue());
+		verify(mockBookingGeneratorService).generateExactBookings(100);
+	}
+
+	// Tests for BookingGeneratorServiceImpl
+
+	@Test
+	void testGenerateExactBookings() throws BookingServiceException {
+		// Create empty list for existing bookings
+		when(mockBookingService.getAllBookings()).thenReturn(new ArrayList<>());
+
+		// Set up booking to return when saveBooking is called
+		Booking mockSavedBooking = new Booking(
+				"lab1",
+				LocalDate.now(),
+				LocalTime.of(10, 0),
+				true,
+				"A101",
+				1
+		);
+		when(mockBookingService.saveBooking(any(BookingDTO.class))).thenReturn(mockSavedBooking);
+
+		// Inject the mock service into our service implementation
+		ReflectionTestUtils.setField(bookingGeneratorService, "bookingService", mockBookingService);
+
+		// Call the method under test
+		List<Booking> result = bookingGeneratorService.generateExactBookings(1);
+
+		// Verify results
+		assertNotNull(result);
+		assertEquals(1, result.size());
+		verify(mockBookingService, atLeastOnce()).getAllBookings();
+		verify(mockBookingService, atLeastOnce()).saveBooking(any(BookingDTO.class));
+	}
+
+	@Test
+	void testClearAllBookings() {
+		// Mock the service to return a specific count when clearAllBookings is called
+		when(mockBookingGeneratorService.clearAllBookings()).thenReturn(5);
+
+		// Call the method under test
+		ResponseEntity<Map<String, Object>> response = bookingGeneratorController.clearAllBookings();
+
+		// Verify the response
+		assertNotNull(response);
+		assertEquals(200, response.getStatusCodeValue());
+
+		Map<String, Object> body = response.getBody();
+		assertNotNull(body);
+		assertEquals("Successfully cleared 5 bookings", body.get("message"));
+		assertEquals(5, body.get("totalRemoved"));
+
+		// Verify the service method was called
+		verify(mockBookingGeneratorService, times(1)).clearAllBookings();
+	}
+
+	@Test
+	void testClearAllBookingsWithException() throws BookingServiceException {
+		// Create list of bookings with one that will cause an exception
+		List<Booking> bookingsToDelete = new ArrayList<>();
+		bookingsToDelete.add(new Booking("booking1", LocalDate.now(), LocalTime.of(10, 0), false, "A101", 1));
+		bookingsToDelete.add(new Booking("errorBooking", LocalDate.now(), LocalTime.of(14, 0), false, "B201", 2));
+
+		when(mockBookingService.getAllBookings()).thenReturn(bookingsToDelete);
+		doNothing().when(mockBookingService).deleteBooking("booking1");
+		doThrow(new BookingServiceException("Error deleting booking")).when(mockBookingService).deleteBooking("errorBooking");
+
+		// Inject the mock service into our service implementation
+		ReflectionTestUtils.setField(bookingGeneratorService, "bookingService", mockBookingService);
+
+		// Call the method under test
+		int result = bookingGeneratorService.clearAllBookings();
+
+		// Verify results
+		assertEquals(2, result); // Should still return the total count
+		verify(mockBookingService).getAllBookings();
+		verify(mockBookingService, times(2)).deleteBooking(anyString());
+	}
+
+	@Test
+	void testInitializeLabCounter() throws BookingServiceException {
+		// Setup bookings with lab IDs
+		List<Booking> existingBookings = new ArrayList<>();
+
+		existingBookings.add(new Booking("lab1", LocalDate.now(), LocalTime.of(9, 0), false, "A101", 1));
+		existingBookings.add(new Booking("lab5", LocalDate.now(), LocalTime.of(11, 0), false, "B201", 2));
+		existingBookings.add(new Booking("test123", LocalDate.now(), LocalTime.of(13, 0), false, "C301", 3));
+		existingBookings.add(new Booking("labXYZ", LocalDate.now(), LocalTime.of(15, 0), false, "D401", 4));
+
+		when(mockBookingService.getAllBookings()).thenReturn(existingBookings);
+
+		// Set up booking to return when saveBooking is called
+		Booking mockSavedBooking = new Booking(
+				"lab6",
+				LocalDate.now(),
+				LocalTime.of(10, 0),
+				true,
+				"A101",
+				1
+		);
+		when(mockBookingService.saveBooking(any(BookingDTO.class))).thenReturn(mockSavedBooking);
+
+		// Inject the mock service into our service implementation
+		ReflectionTestUtils.setField(bookingGeneratorService, "bookingService", mockBookingService);
+
+		// Generate a booking to trigger initializeLabCounter
+		bookingGeneratorService.generateExactBookings(1);
+
+		// Verify lab counter is initialized correctly by capturing the BookingDTO
+		ArgumentCaptor<BookingDTO> bookingCaptor = ArgumentCaptor.forClass(BookingDTO.class);
+		verify(mockBookingService).saveBooking(bookingCaptor.capture());
+
+		// Lab counter should start at 6 (after lab5)
+		BookingDTO capturedBooking = bookingCaptor.getValue();
+		assertTrue(capturedBooking.getBookingId().startsWith("lab6"));
+	}
+
+	@Test
+	void testNoAvailableSlots() throws BookingServiceException {
+		// Setup to make all slots booked
+		List<Booking> bookedSlots = new ArrayList<>();
+		String[] classrooms = {"A101", "A102", "B201", "B202", "C301", "C302", "D401", "D402", "E501", "E502"};
+		int[] validHours = {7, 9, 11, 13, 15, 17, 19};
+
+		for (String classroom : classrooms) {
+			for (int day = 0; day < 30; day++) {
+				for (int hour : validHours) {
+					bookedSlots.add(new Booking(
+							"booked" + bookedSlots.size(),
+							LocalDate.now().plusDays(day),
+							LocalTime.of(hour, 0),
+							false,
+							classroom,
+							1
+					));
+				}
+			}
+		}
+
+		when(mockBookingService.getAllBookings()).thenReturn(bookedSlots);
+
+		// Inject the mock service into our service implementation
+		ReflectionTestUtils.setField(bookingGeneratorService, "bookingService", mockBookingService);
+
+		// Call the method under test
+		List<Booking> result = bookingGeneratorService.generateExactBookings(10);
+
+		// Verify results
+		assertTrue(result.isEmpty());
+		verify(mockBookingService, never()).saveBooking(any(BookingDTO.class));
+	}
+
+	@Test
+	void testBookingServiceThrowsException() throws BookingServiceException {
+		// Create empty list for existing bookings
+		when(mockBookingService.getAllBookings()).thenReturn(new ArrayList<>());
+
+		// Make saveBooking throw an exception
+		when(mockBookingService.saveBooking(any(BookingDTO.class)))
+				.thenThrow(new BookingServiceException("Test exception"));
+
+		// Inject the mock service into our service implementation
+		ReflectionTestUtils.setField(bookingGeneratorService, "bookingService", mockBookingService);
+
+		// Call the method under test
+		List<Booking> result = bookingGeneratorService.generateExactBookings(5);
+
+		// Verify results
+		assertTrue(result.isEmpty());
+		verify(mockBookingService, atLeastOnce()).saveBooking(any(BookingDTO.class));
+	}
+
+	@Test
+	void testMaxAttemptsReached() throws BookingServiceException {
+		// Create empty list for existing bookings
+		when(mockBookingService.getAllBookings()).thenReturn(new ArrayList<>());
+
+		// Set up to make attempts exceed max by having saveBooking always throw exception
+		when(mockBookingService.saveBooking(any(BookingDTO.class)))
+				.thenThrow(new BookingServiceException("Conflict"));
+
+		// Inject the mock service into our service implementation
+		ReflectionTestUtils.setField(bookingGeneratorService, "bookingService", mockBookingService);
+
+		// Call the method under test
+		List<Booking> result = bookingGeneratorService.generateExactBookings(1);
+
+		// Verify results
+		assertTrue(result.isEmpty());
+		// Should try 5 times (maxAttempts = targetBookings * 5)
+		verify(mockBookingService, times(5)).saveBooking(any(BookingDTO.class));
+	}
 }
