@@ -14,6 +14,7 @@ public class BookingDTO {
     private LocalTime bookingTime;
     private boolean disable;
     private String bookingClassRoom;
+    private Integer priority;
 
 
     public boolean getDisable() {return disable;}
@@ -36,4 +37,7 @@ public class BookingDTO {
     public void setBookingDate(LocalDate bookingDate) {
         this.bookingDate = bookingDate;
     }
+
+    public Integer getPriority() {return priority;}
+    public void setPriority(Integer priority) {this.priority = priority;}
 }
