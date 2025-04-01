@@ -4,7 +4,10 @@ import eci.edu.back.cvds_back.config.BookingServiceException;
 import eci.edu.back.cvds_back.model.Booking;
 import eci.edu.back.cvds_back.service.interfaces.BookingMongoRepository;
 import eci.edu.back.cvds_back.service.interfaces.BookingRepository;
+import eci.edu.back.cvds_back.service.interfaces.UserMongoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -49,5 +52,4 @@ public class BookingRepositoryImpl implements BookingRepository {
     public boolean existsById(String bookingId) {
         return bookingMongoRepository.existsById(bookingId);
     }
-
 }

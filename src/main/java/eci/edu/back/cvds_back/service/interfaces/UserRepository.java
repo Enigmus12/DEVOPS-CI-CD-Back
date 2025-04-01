@@ -8,6 +8,7 @@ import java.util.List;
 public interface UserRepository{
     void save(User user);
     List<User> findAll();
-    User findById(String id) throws UserServiceException;
-    void deleteById(String id) throws UserServiceException;
+    User findById(String userId) throws UserServiceException;
+    User findByEmail(String email) throws UserServiceException;
+    void deleteById(String userId) throws UserServiceException;
 }

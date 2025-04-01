@@ -37,12 +37,14 @@ public class DtoTests {
     void testUserDTOGettersAndSetters() {
         UserDTO dto = new UserDTO();
 
-        dto.setId("testId");
-        dto.setUsername("testUsername");
-        dto.setPhone(123456789);
+        dto.setUserId("testId");
+        dto.setEmail("testUsername");
+        dto.setPassword("Juanito123");
+        dto.setPasswordConfirmation("Juanito123");
 
-        assertEquals("testId", dto.getId());
-        assertEquals("testUsername", dto.getUsername());
-        assertEquals(123456789, dto.getPhone());
+        assertEquals("testId", dto.getUserId());
+        assertEquals("testUsername", dto.getEmail());
+        assertEquals("Juanito123", dto.getPassword());
+        assertEquals("Juanito123", dto.getPasswordConfirmation());
     }
 }
