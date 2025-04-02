@@ -1,37 +1,44 @@
 package eci.edu.back.cvds_back.model;
 
 import eci.edu.back.cvds_back.dto.UserDTO;
-import jakarta.persistence.Id;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
 @Document(collection = "users")
 public class User {
-    private String id;
-    private String username;
-    private int phone;
+    @Id
+    private String userId;
+    private String email;
+    private String password;
+    private String passwordConfirmation;
 
     @PersistenceCreator
-    public User(String id,String username, int phone) {
-        this.id = id;
-        this.username = username;
-        this.phone = phone;
+    public User(String userId,String email,String password, String passwordConfirmation) {
+        this.userId = userId;
+        this.email = email;
+        this.password = password;
+        this.passwordConfirmation = passwordConfirmation;
     }
 
     public User(UserDTO userDTO) {
-        this.id = userDTO.getId();
-        this.username = userDTO.getUsername();
-        this.phone = userDTO.getPhone();
+        this.userId = userDTO.getUserId();
+        this.email = userDTO.getEmail();
+        this.password = userDTO.getPassword();
+        this.passwordConfirmation = userDTO.getPasswordConfirmation();
     }
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public int getPhone() { return phone; }
-    public void setPhone(int phone) { this.phone = phone; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+
+    public String getPasswordConfirmation() { return passwordConfirmation; }
+    public void setPasswordConfirmation(String passwordConfirmation) { this.passwordConfirmation = passwordConfirmation; }
 
 }

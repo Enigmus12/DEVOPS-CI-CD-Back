@@ -26,15 +26,15 @@ public class UserRepositoryImpl implements UserRepository{
     }
 
     @Override
-    public User findById(String id) throws UserServiceException {
-        Optional<User> user = userMongoRepository.findById(id);
+    public User findById(String userId) throws UserServiceException {
+        Optional<User> user = userMongoRepository.findById(userId);
         if(user.isEmpty()) throw new UserServiceException("User Not found");
         return user.get();
     }
 
     @Override
-    public void deleteById(String id) throws UserServiceException {
-        userMongoRepository.deleteById(id);
+    public void deleteById(String userId) throws UserServiceException {
+        userMongoRepository.deleteById(userId);
     }
 
 }
