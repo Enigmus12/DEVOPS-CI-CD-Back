@@ -1,5 +1,6 @@
 package eci.edu.back.cvds_back.util;
 
+import eci.edu.back.cvds_back.CvdsBackApplication; // Asegura que se importa la clase principal de la app
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest
+@SpringBootTest(classes = CvdsBackApplication.class) // 🚀 Asegura que carga bien el contexto
 @AutoConfigureMockMvc
 class SecurityConfigTest {
 
@@ -21,7 +22,7 @@ class SecurityConfigTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private JwtRequestFilter jwtRequestFilter; // Mock para evitar problemas de contexto
+    private JwtRequestFilter jwtRequestFilter; // Mock para evitar problemas en el contexto
 
     @Test
     void testPublicEndpoints_AccessWithoutAuthentication() throws Exception {
