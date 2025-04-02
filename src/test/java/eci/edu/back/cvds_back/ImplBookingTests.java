@@ -22,6 +22,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -223,7 +224,7 @@ public class ImplBookingTests {
         LocalTime time1 = LocalTime.of(10, 0); // 10:00 AM
         String classRoom = "Sala A";
 
-        Booking existingBooking = new Booking("existing123", today, time1, false, classRoom,2);
+        Booking existingBooking = new Booking("existing123", today, time1, false, classRoom,2, null);
 
         List<Booking> existingBookings = new ArrayList<>();
         existingBookings.add(existingBooking);
@@ -261,7 +262,7 @@ public class ImplBookingTests {
         LocalTime time1 = LocalTime.of(10, 0); // 10:00 AM
         String classRoom = "Sala A";
 
-        Booking existingBooking = new Booking("existing123", today, time1, false, classRoom,3);
+        Booking existingBooking = new Booking("existing123", today, time1, false, classRoom,3, null);
 
         List<Booking> existingBookings = new ArrayList<>();
         existingBookings.add(existingBooking);
@@ -297,7 +298,7 @@ public class ImplBookingTests {
         LocalTime time1 = LocalTime.of(10, 0); // 10:00 AM
         String classRoomA = "Sala A";
 
-        Booking existingBooking = new Booking("existing123", today, time1, false, classRoomA,4);
+        Booking existingBooking = new Booking("existing123", today, time1, false, classRoomA,4, null);
 
         List<Booking> existingBookings = new ArrayList<>();
         existingBookings.add(existingBooking);
@@ -336,7 +337,7 @@ public class ImplBookingTests {
         LocalTime time1 = LocalTime.of(10, 0); // 10:00 AM
         String classRoom = "Sala A";
 
-        Booking existingBooking = new Booking("existing123", today, time1, false, classRoom,5);
+        Booking existingBooking = new Booking("existing123", today, time1, false, classRoom,5, null);
 
         List<Booking> existingBookings = new ArrayList<>();
         existingBookings.add(existingBooking);
@@ -375,7 +376,7 @@ public class ImplBookingTests {
         LocalTime time1 = LocalTime.of(14, 0); // 2:00 PM
         String classRoom = "Sala A";
 
-        Booking existingBooking = new Booking("existing123", today, time1, false, classRoom,1);
+        Booking existingBooking = new Booking("existing123", today, time1, false, classRoom,1, null);
 
         List<Booking> existingBookings = new ArrayList<>();
         existingBookings.add(existingBooking);
@@ -408,7 +409,7 @@ public class ImplBookingTests {
         LocalTime time1 = LocalTime.of(14, 0); // 2:00 PM
         String classRoom = "Sala A";
 
-        Booking existingBooking = new Booking("existing123", today, time1, false, classRoom,2);
+        Booking existingBooking = new Booking("existing123", today, time1, false, classRoom,2, null);
 
         List<Booking> existingBookings = new ArrayList<>();
         existingBookings.add(existingBooking);
@@ -490,61 +491,6 @@ public class ImplBookingTests {
         verify(mockBookingRepository).deleteById("test123");
     }
 
-    @Test
-    void testUpdateBooking_ActivateSuccess() throws BookingServiceException {
-        Booking disabledBooking = new Booking(bookingDTO);
-        disabledBooking.setDisable(true);
-
-        when(mockBookingRepository.findById("test123")).thenReturn(disabledBooking);
-
-        Booking result = bookingService.updateBooking("test123", false);
-        assertNotNull(result);
-        assertFalse(result.isDisable());
-        verify(mockBookingRepository).update(any(Booking.class));
-    }
-
-    @Test
-    void testUpdateBooking_DeactivateSuccess() throws BookingServiceException {
-        Booking enabledBooking = new Booking(bookingDTO);
-        enabledBooking.setDisable(false);
-
-        when(mockBookingRepository.findById("test123")).thenReturn(enabledBooking);
-
-        Booking result = bookingService.updateBooking("test123", true);
-        assertNotNull(result);
-        assertTrue(result.isDisable());
-        verify(mockBookingRepository).update(any(Booking.class));
-    }
-
-    @Test
-    void testUpdateBooking_AlreadyActive() throws BookingServiceException {
-        Booking enabledBooking = new Booking(bookingDTO);
-        enabledBooking.setDisable(false);
-
-        when(mockBookingRepository.findById("test123")).thenReturn(enabledBooking);
-
-        BookingServiceException exception = assertThrows(BookingServiceException.class, () -> {
-            bookingService.updateBooking("test123", false);
-        });
-
-        assertEquals("La reserva ya está activa.", exception.getMessage());
-    }
-
-    @Test
-    void testUpdateBooking_AlreadyDisabled() throws BookingServiceException {
-        Booking disabledBooking = new Booking(bookingDTO);
-        disabledBooking.setDisable(true);
-
-        when(mockBookingRepository.findById("test123")).thenReturn(disabledBooking);
-
-        BookingServiceException exception = assertThrows(BookingServiceException.class, () -> {
-            bookingService.updateBooking("test123", true);
-        });
-
-        assertEquals("La reserva ya está cancelada.", exception.getMessage());
-    }
-
-
     // Tests for BookingGeneratorServiceImpl
     @Test
     void testGenerateExactBookings() throws BookingServiceException {
@@ -558,7 +504,7 @@ public class ImplBookingTests {
                 LocalTime.of(10, 0),
                 true,
                 "A101",
-                1
+                1, null
         );
         when(mockBookingService.saveBooking(any(BookingDTO.class))).thenReturn(mockSavedBooking);
 
@@ -600,8 +546,8 @@ public class ImplBookingTests {
     void testClearAllBookingsWithException() throws BookingServiceException {
         // Crear una lista de reservas con una que causará una excepción
         List<Booking> bookingsToDelete = new ArrayList<>();
-        bookingsToDelete.add(new Booking("booking1", LocalDate.now(), LocalTime.of(10, 0), false, "A101", 1));
-        bookingsToDelete.add(new Booking("errorBooking", LocalDate.now(), LocalTime.of(14, 0), false, "B201", 2));
+        bookingsToDelete.add(new Booking("booking1", LocalDate.now(), LocalTime.of(10, 0), false, "A101", 1, null));
+        bookingsToDelete.add(new Booking("errorBooking", LocalDate.now(), LocalTime.of(14, 0), false, "B201", 2, null));
 
         when(mockBookingService.getAllBookings()).thenReturn(bookingsToDelete);
         doNothing().when(mockBookingService).deleteBooking("booking1");
@@ -624,10 +570,10 @@ public class ImplBookingTests {
         // Configurar reservas con identificadores de laboratorio
         List<Booking> existingBookings = new ArrayList<>();
 
-        existingBookings.add(new Booking("lab1", LocalDate.now(), LocalTime.of(9, 0), false, "A101", 1));
-        existingBookings.add(new Booking("lab5", LocalDate.now(), LocalTime.of(11, 0), false, "B201", 2));
-        existingBookings.add(new Booking("test123", LocalDate.now(), LocalTime.of(13, 0), false, "C301", 3));
-        existingBookings.add(new Booking("labXYZ", LocalDate.now(), LocalTime.of(15, 0), false, "D401", 4));
+        existingBookings.add(new Booking("lab1", LocalDate.now(), LocalTime.of(9, 0), false, "A101", 1, null));
+        existingBookings.add(new Booking("lab5", LocalDate.now(), LocalTime.of(11, 0), false, "B201", 2, null));
+        existingBookings.add(new Booking("test123", LocalDate.now(), LocalTime.of(13, 0), false, "C301", 3, null));
+        existingBookings.add(new Booking("labXYZ", LocalDate.now(), LocalTime.of(15, 0), false, "D401", 4, null));
 
         when(mockBookingService.getAllBookings()).thenReturn(existingBookings);
 
@@ -638,7 +584,7 @@ public class ImplBookingTests {
                 LocalTime.of(10, 0),
                 true,
                 "A101",
-                1
+                1, null
         );
         when(mockBookingService.saveBooking(any(BookingDTO.class))).thenReturn(mockSavedBooking);
 
@@ -656,6 +602,228 @@ public class ImplBookingTests {
         BookingDTO capturedBooking = bookingCaptor.getValue();
         assertTrue(capturedBooking.getBookingId().startsWith("lab6"));
     }
+    @Test
+    void testGetBooking() throws BookingServiceException {
+        Booking booking = new Booking("lab1", LocalDate.now(), LocalTime.of(9, 0), false, "A101", 1, null);
+        booking.setBookingId("test123");
+        when(mockBookingRepository.findById("test123")).thenReturn(booking);
+
+        Booking result = bookingService.getBooking("test123");
+
+        assertNotNull(result);
+        assertEquals("test123", result.getBookingId());
+        verify(mockBookingRepository, times(1)).findById("test123");
+    }
+
+    @Test
+    void testMakeReservation() throws BookingServiceException {
+        Booking booking = new Booking("lab1", LocalDate.now(), LocalTime.of(9, 0), true, "A101", 1, null);
+        booking.setBookingId("test123");
+        when(mockBookingRepository.findById("test123")).thenReturn(booking);
+
+        Booking result = bookingService.makeReservation("test123", "user1");
+
+        assertNotNull(result);
+        assertFalse(result.isDisable());
+        assertEquals("user1", result.getReservedBy());
+        verify(mockBookingRepository, times(1)).update(booking);
+    }
+    @Test
+    void testMakeReservationAlreadyActive() throws BookingServiceException {
+        Booking booking = new Booking("lab1", LocalDate.now(), LocalTime.of(9, 0), false, "A101", 1, "user1");
+        booking.setBookingId("test123");
+        when(mockBookingRepository.findById("test123")).thenReturn(booking);
+
+        BookingServiceException exception = assertThrows(BookingServiceException.class, () -> {
+            bookingService.makeReservation("test123", "user2");
+        });
+
+        assertEquals("La reserva ya está activa.", exception.getMessage());
+        verify(mockBookingRepository, never()).update(booking);
+    }
+    @Test
+    void testCancelReservationWithNullReservedBy() throws BookingServiceException {
+        Booking booking = new Booking("lab1", LocalDate.now(), LocalTime.of(9, 0), false, "A101", 1, null);
+        booking.setBookingId("test123");
+        when(mockBookingRepository.findById("test123")).thenReturn(booking);
+    
+       
+        Booking result = bookingService.cancelReservation("test123", "user2");
+    
+        assertNotNull(result);
+        assertTrue(result.isDisable());
+        verify(mockBookingRepository, times(1)).update(booking);
+    }
+    @Test
+    void testCancelReservation() throws BookingServiceException {
+        Booking booking = new Booking("lab1", LocalDate.now(), LocalTime.of(9, 0), false, "A101", 1, "user1");
+        booking.setBookingId("test123");
+        when(mockBookingRepository.findById("test123")).thenReturn(booking);
+
+        Booking result = bookingService.cancelReservation("test123", "user1");
+
+        assertNotNull(result);
+        assertTrue(result.isDisable());
+        verify(mockBookingRepository, times(1)).update(booking);
+    }
+    @Test
+    void testCancelAlreadyCanceledReservation() throws BookingServiceException {
+        Booking booking = new Booking("lab1", LocalDate.now(), LocalTime.of(9, 0), true, "A101", 1, "user1");
+        booking.setBookingId("test123");
+        when(mockBookingRepository.findById("test123")).thenReturn(booking);
+
+        BookingServiceException exception = assertThrows(BookingServiceException.class, () -> {
+            bookingService.cancelReservation("test123", "user1");
+        });
+
+        assertEquals("La reserva ya está cancelada.", exception.getMessage());
+        verify(mockBookingRepository, never()).update(booking);
+    }
 
 
+    @Test
+    void testCancelReservationByDifferentUser() throws BookingServiceException {
+        Booking booking = new Booking("lab1", LocalDate.now(), LocalTime.of(9, 0), false, "A101", 1, "user1");
+        booking.setBookingId("test123");
+        when(mockBookingRepository.findById("test123")).thenReturn(booking);
+
+        BookingServiceException exception = assertThrows(BookingServiceException.class, () -> {
+            bookingService.cancelReservation("test123", "user2");
+        });
+
+        assertEquals("Solo el usuario que realizó la reserva puede cancelarla.", exception.getMessage());
+        verify(mockBookingRepository, never()).update(booking);
+    }
+
+    @Test
+    void testGetBookingsByReservedBy() {
+        Booking booking1 = new Booking("lab1", LocalDate.now(), LocalTime.of(9, 0), false, "A101", 1, "user1");
+        Booking booking2 = new Booking("lab2", LocalDate.now(), LocalTime.of(10, 0), false, "A102", 1, "user1");
+        Booking booking3 = new Booking("lab3", LocalDate.now(), LocalTime.of(11, 0), false, "A103", 1, "user2");
+        
+        when(mockBookingRepository.findAll()).thenReturn(Arrays.asList(booking1, booking2, booking3));
+
+        List<Booking> result = bookingService.getBookingsByReservedBy("user1");
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertTrue(result.contains(booking1));
+        assertTrue(result.contains(booking2));
+        verify(mockBookingRepository, times(1)).findAll();
+    }
+    @Test
+    void testGetBookingsByReservedByWithNullValues() {
+        Booking booking1 = new Booking("lab1", LocalDate.now(), LocalTime.of(9, 0), false, "A101", 1, "user1");
+        Booking booking2 = new Booking("lab2", LocalDate.now(), LocalTime.of(10, 0), false, "A102", 1, null); // Sin usuario
+        Booking booking3 = new Booking("lab3", LocalDate.now(), LocalTime.of(11, 0), false, "A103", 1, "user2");
+    
+        when(mockBookingRepository.findAll()).thenReturn(Arrays.asList(booking1, booking2, booking3));
+    
+        List<Booking> result = bookingService.getBookingsByReservedBy("user1");
+    
+        assertNotNull(result);
+        assertEquals(1, result.size()); // Solo booking1 debe estar en la lista
+        assertTrue(result.contains(booking1));
+        assertFalse(result.contains(booking2)); // No tiene usuario
+        assertFalse(result.contains(booking3)); // Otro usuario
+        verify(mockBookingRepository, times(1)).findAll();
+    }
+    
+    @Test
+    void testGenerateRandomBookings() {
+        List<Booking> bookings = bookingGeneratorService.generateRandomBookings(3, 5);
+        assertNotNull(bookings);
+        assertTrue(bookings.size() >= 3 && bookings.size() <= 5, "Generated bookings should be within range");
+    }
+
+    @Test
+    void testGenerateBookings() {
+        List<Booking> bookings = bookingGeneratorService.generateExactBookings(5);
+        assertNotNull(bookings);
+        assertEquals(5, bookings.size(), "Should generate exactly 5 bookings");
+    }
+    @Test
+    void testGenerateBookings_NoAvailableSlots() {
+        // Mock para devolver que no hay slots disponibles
+        BookingGeneratorServiceImpl spyService = spy(bookingGeneratorService);
+        doReturn(null).when(spyService).getRandomAvailableBooking(any(Map.class));
+
+        List<Booking> result = spyService.generateExactBookings(5);
+
+        assertEquals(0, result.size()); // No debe generar ninguna reserva
+    }
+
+    @Test
+    void testGenerateBookings_BookingServiceException() throws BookingServiceException {
+        // Mock para generar una reserva disponible
+        Booking mockBooking = new Booking("lab1", LocalDate.now(), LocalTime.of(9, 0), false, "A101", 1, "user1");
+        BookingGeneratorServiceImpl spyService = spy(bookingGeneratorService);
+        doReturn(mockBooking).when(spyService).getRandomAvailableBooking(any(Map.class));
+
+        // Mock para lanzar una excepción al guardar la reserva
+        when(mockBookingService.saveBooking(any(BookingDTO.class))).thenThrow(new BookingServiceException("Error al guardar"));
+
+        List<Booking> result = spyService.generateExactBookings(3);
+
+        assertEquals(0, result.size()); // No se deben agregar reservas por la excepción
+    }
+    @Test
+    void testGetRandomAvailableBooking_NoAvailableSlots() {
+        Map<String, Map<LocalDate, Set<Integer>>> bookedSlots = new HashMap<>();
+        LocalDate today = LocalDate.now();
+    
+        // Llenamos todas las aulas con todas las horas ocupadas en los próximos 30 días
+        for (String classroom : bookingGeneratorService.classrooms) {
+            bookedSlots.put(classroom, new HashMap<>());
+            for (int day = 0; day < 30; day++) {
+                LocalDate date = today.plusDays(day);
+                bookedSlots.get(classroom).put(date, new HashSet<>());
+    
+                // Marcar todas las horas como reservadas
+                for (int hour : bookingGeneratorService.validHours) {
+                    bookedSlots.get(classroom).get(date).add(hour);
+                }
+            }
+        }
+    
+        // Llamar al método cuando no hay espacios disponibles
+        Booking result = bookingGeneratorService.getRandomAvailableBooking(bookedSlots);
+    
+        // Verificar que el resultado es null
+        assertNull(result, "El método debe devolver null cuando no hay espacios disponibles");
+    }
+
+    @Test
+    void testGenerateBookings_AddNewDateToBookedSlots() throws BookingServiceException {
+        BookingGeneratorServiceImpl spyService = spy(bookingGeneratorService);
+    
+        // Simular bookedSlots con un aula pero sin reservas en cierta fecha
+        Map<String, Map<LocalDate, Set<Integer>>> bookedSlots = new HashMap<>();
+        bookedSlots.put("A101", new HashMap<>()); // Aula con mapa vacío (sin fechas)
+    
+        // Mock para devolver una reserva en una nueva fecha
+        Booking mockBooking = new Booking("lab1", LocalDate.now().plusDays(2), LocalTime.of(9, 0), false, "A101", 1, "user1");
+        doReturn(mockBooking).when(spyService).getRandomAvailableBooking(any(Map.class));
+    
+        // Simular que la reserva se guarda correctamente
+        when(mockBookingService.saveBooking(any(BookingDTO.class))).thenReturn(mockBooking);
+    
+        List<Booking> result = spyService.generateExactBookings(1);
+    
+        assertEquals(1, result.size(), "Debe haberse generado una reserva");
+    }
+
+    @Test
+    void testIsSlotBooked_NoReservationsForClassroom() {
+        Map<String, Map<LocalDate, Set<Integer>>> bookedSlots = new HashMap<>();
+        
+        // No se agrega "A101" a bookedSlots
+        boolean result = bookingGeneratorService.isSlotBooked(bookedSlots, "A101", LocalDate.now(), 9);
+    
+        assertFalse(result, "Si el aula no tiene reservas, debe devolver false");
+    }
 }
+    
+
+
+

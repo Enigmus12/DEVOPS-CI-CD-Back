@@ -3,6 +3,8 @@ package eci.edu.back.cvds_back;
 
 import eci.edu.back.cvds_back.config.UserServiceException;
 import eci.edu.back.cvds_back.controller.UserController;
+import eci.edu.back.cvds_back.dto.AuthenticationResponseDTO;
+import eci.edu.back.cvds_back.dto.UserAuthenticationDTO;
 import eci.edu.back.cvds_back.dto.UserDTO;
 import eci.edu.back.cvds_back.model.User;
 import eci.edu.back.cvds_back.service.impl.UserRepositoryImpl;
@@ -16,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
+import eci.edu.back.cvds_back.util.JwtUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,9 +46,11 @@ public class ImplUserTests {
 
     @Mock
     private UserService mockUserService;
-
     @InjectMocks
     private UserController userController;
+
+    @Mock
+    private JwtUtil mockJwtUtil;
 
     private UserDTO userDTO;
     private User user;
@@ -58,9 +63,9 @@ public class ImplUserTests {
 
         // Configuración inicial para pruebas de User
         userDTO = new UserDTO();
-        userDTO.setId("user123");
-        userDTO.setUsername("testuser");
-        userDTO.setPhone(123456789);
+        userDTO.setUserId("user123");
+        userDTO.setEmail("testuser");
+        userDTO.setPassword("123456789");
 
         user = new User(userDTO);
         userList = new ArrayList<>();
@@ -75,7 +80,8 @@ public class ImplUserTests {
 
         when(mockUserService.getAllUsers()).thenReturn(userList);
         when(mockUserService.getUser("user123")).thenReturn(user);
-        when(mockUserService.saveUser(any(UserDTO.class))).thenReturn(user);
+        ReflectionTestUtils.setField(userController, "userService", mockUserService);
+        ReflectionTestUtils.setField(userService, "jwtUtil", mockJwtUtil);
 
         // Configure with ReflectionTestUtils
         ReflectionTestUtils.setField(userService, "userRepository", mockUserRepository);
@@ -95,7 +101,7 @@ public class ImplUserTests {
     void testUserRepositoryFindById_Success() throws UserServiceException {
         User result = userRepository.findById("user123");
         assertNotNull(result);
-        assertEquals("user123", result.getId());
+        assertEquals("user123", result.getUserId());
         verify(userMongoRepository).findById("user123");
     }
 
@@ -130,7 +136,7 @@ public class ImplUserTests {
 
         User result = userService.getUser("user123");
         assertNotNull(result);
-        assertEquals("user123", result.getId());
+        assertEquals("user123", result.getUserId());
         verify(mockUserRepository).findById("user123");
     }
 
@@ -148,15 +154,15 @@ public class ImplUserTests {
     @Test
     void testSaveUser() {
         UserDTO newUserDTO = new UserDTO();
-        newUserDTO.setId("newUser");
-        newUserDTO.setUsername("newUsername");
-        newUserDTO.setPhone(987654321);
+        newUserDTO.setUserId("newUser");
+        newUserDTO.setEmail("newUsername");
+        newUserDTO.setPassword("987654321");
 
         User result = userService.saveUser(newUserDTO);
         assertNotNull(result);
-        assertEquals("newUser", result.getId());
-        assertEquals("newUsername", result.getUsername());
-        assertEquals(987654321, result.getPhone());
+        assertEquals("newUser", result.getUserId());
+        assertEquals("newUsername", result.getEmail());
+        assertEquals("987654321", result.getPassword());
         verify(mockUserRepository).save(any(User.class));
     }
 
@@ -174,5 +180,73 @@ public class ImplUserTests {
 
         userService.deleteUser("user123");
         verify(mockUserRepository).deleteById("user123");
+    }
+    
+    @Test
+    void testAuthenticate_WrongPassword() {
+        when(mockUserRepository.findById("user123")).thenReturn(user);
+        
+        UserAuthenticationDTO authDTO = new UserAuthenticationDTO();
+        authDTO.setUserId("user123");
+        authDTO.setPassword("wrongPassword");
+        
+        AuthenticationResponseDTO response = userService.authenticate(authDTO);
+        
+        assertNotNull(response);
+        assertFalse(response.isAuthenticated());
+        assertEquals("Contraseña incorrecta", response.getMessage());
+    }
+    
+    @Test
+    void testAuthenticate_Success() {
+        when(mockUserRepository.findById("user123")).thenReturn(user);
+        when(mockJwtUtil.generateToken("user123")).thenReturn("mockToken");
+        
+        UserAuthenticationDTO authDTO = new UserAuthenticationDTO();
+        authDTO.setUserId("user123");
+        authDTO.setPassword("123456789");
+        
+        AuthenticationResponseDTO response = userService.authenticate(authDTO);
+        
+        assertNotNull(response);
+        assertTrue(response.isAuthenticated());
+        assertNotNull(response.getToken());
+        assertEquals("Autenticación exitosa", response.getMessage());
+    }
+    @Test
+    void testAuthenticate_UserNotFound() {
+        when(mockUserRepository.findById("user123")).thenThrow(new UserServiceException("Usuario no encontrado"));
+    
+        UserAuthenticationDTO authDTO = new UserAuthenticationDTO();
+        authDTO.setUserId("user123");
+        authDTO.setPassword("123456789");
+    
+        AuthenticationResponseDTO response = userService.authenticate(authDTO);
+    
+        assertNotNull(response);
+        assertFalse(response.isAuthenticated());
+        assertNull(response.getToken());
+        assertEquals("Usuario no encontrado", response.getMessage());
+    }
+    
+    @Test
+    void testDeleteUser_NotFound() {
+        doThrow(new UserServiceException("User Not found")).when(mockUserRepository).deleteById("nonExistingId");
+        
+        UserServiceException exception = assertThrows(UserServiceException.class, () -> {
+            userService.deleteUser("nonExistingId");
+        });
+        
+        assertEquals("User Not found", exception.getMessage());
+        verify(mockUserRepository).deleteById("nonExistingId");
+    }
+    
+    @Test
+    void testSaveUser_NullData() {
+        UserDTO nullUserDTO = null;
+        
+        assertThrows(NullPointerException.class, () -> {
+            userService.saveUser(nullUserDTO);
+        });
     }
 }

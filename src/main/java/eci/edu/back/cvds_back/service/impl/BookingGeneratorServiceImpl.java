@@ -22,12 +22,12 @@ public class BookingGeneratorServiceImpl implements BookingGeneratorService {
     private final Random random = new Random();
     private final AtomicInteger labCounter = new AtomicInteger(1);
 
-    private final String[] classrooms = {
+    public final String[] classrooms = {
             "A101", "A102", "B201", "B202", "C301",
             "C302", "D401", "D402", "E501", "E502"
     };
 
-    private final int[] validHours = {7, 9, 11, 13, 15, 17, 19};
+    public final int[] validHours = {7, 9, 11, 13, 15, 17, 19};
 
     @Override
     public List<Booking> generateRandomBookings(int min, int max) {
@@ -136,7 +136,7 @@ public class BookingGeneratorServiceImpl implements BookingGeneratorService {
         labCounter.set(maxLabNumber + 1);
     }
 
-    private Booking getRandomAvailableBooking(Map<String, Map<LocalDate, Set<Integer>>> bookedSlots) {
+    public Booking getRandomAvailableBooking(Map<String, Map<LocalDate, Set<Integer>>> bookedSlots) {
         List<Booking> availableSlots = new ArrayList<>();
 
         LocalDate today = LocalDate.now();
@@ -168,7 +168,7 @@ public class BookingGeneratorServiceImpl implements BookingGeneratorService {
         return availableSlots.get(random.nextInt(availableSlots.size()));
     }
 
-    private boolean isSlotBooked(Map<String, Map<LocalDate, Set<Integer>>> bookedSlots,
+    public boolean isSlotBooked(Map<String, Map<LocalDate, Set<Integer>>> bookedSlots,
                                  String classroom, LocalDate date, int hour) {
         Map<LocalDate, Set<Integer>> classroomBookings = bookedSlots.get(classroom);
         if (classroomBookings == null) return false;
