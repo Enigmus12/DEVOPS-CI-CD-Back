@@ -4,7 +4,6 @@ import eci.edu.back.cvds_back.dto.BookingDTO;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -18,26 +17,28 @@ public class Booking {
     private boolean disable;
     private String bookingClassRoom;
     private Integer priority;
+    private String reservedBy; // Almacena el userId del usuario que realizó la reserva
 
     @PersistenceCreator
-    public Booking(String bookingId, LocalDate bookingDate,LocalTime bookingTime ,boolean disable, String bookingClassRoom, Integer priority) {
+    public Booking(String bookingId, LocalDate bookingDate, LocalTime bookingTime, boolean disable, String bookingClassRoom, Integer priority, String reservedBy) {
         this.bookingId = bookingId;
         this.bookingDate = bookingDate;
         this.bookingTime = bookingTime;
         this.disable = disable;
         this.bookingClassRoom = bookingClassRoom;
         this.priority = priority;
+        this.reservedBy = reservedBy;
     }
 
     public Booking(BookingDTO bookingDTO) {
         this.bookingTime = bookingDTO.getBookingTime();
         this.bookingDate = bookingDTO.getBookingDate();
         this.bookingId = bookingDTO.getBookingId();
-        this.disable = true;
+        this.disable = true; // Los bookings se crean inicialmente como disponibles (disable=true)
         this.bookingClassRoom = bookingDTO.getBookingClassRoom();
         this.priority = bookingDTO.getPriority();
+        // No asignamos reservedBy aquí, porque inicialmente no tiene reserva
     }
-
 
     public boolean isDisable() {return disable;}
     public void setDisable(boolean disable) {this.disable = disable;}
@@ -46,7 +47,7 @@ public class Booking {
     public void setBookingTime(LocalTime bookingTime) {this.bookingTime = bookingTime;}
 
     public String getBookingClassRoom() {return bookingClassRoom;}
-    public void setBookingClassRoom(String bookingClassRoom) {}
+    public void setBookingClassRoom(String bookingClassRoom) {this.bookingClassRoom = bookingClassRoom;}
 
     public String getBookingId() {return bookingId;}
     public void setBookingId(String bookingId) {this.bookingId = bookingId;}
@@ -56,4 +57,7 @@ public class Booking {
 
     public Integer getPriority() {return priority;}
     public void setPriority(Integer priority) {this.priority = priority;}
+
+    public String getReservedBy() {return reservedBy;}
+    public void setReservedBy(String reservedBy) {this.reservedBy = reservedBy;}
 }

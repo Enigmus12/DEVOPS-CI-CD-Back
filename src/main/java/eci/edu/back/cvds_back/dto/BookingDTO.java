@@ -6,8 +6,7 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-//@Getter
-//@Setter
+
 public class BookingDTO {
     private String bookingId;
     private LocalDate bookingDate;
@@ -15,7 +14,6 @@ public class BookingDTO {
     private boolean disable;
     private String bookingClassRoom;
     private Integer priority;
-
 
     public boolean getDisable() {return disable;}
     public void setDisable(boolean disable) {this.disable = disable;}
@@ -26,18 +24,13 @@ public class BookingDTO {
     public String getBookingClassRoom() {return bookingClassRoom;}
     public void setBookingClassRoom(String bookingClassRoom) {this.bookingClassRoom = bookingClassRoom;}
 
-    public String getBookingId() {
-        return bookingId;
-    }
-    public void setBookingId(String bookingId) {
-        this.bookingId = bookingId;
-    }
+    public String getBookingId() {return bookingId;}
+    public void setBookingId(String bookingId) {this.bookingId = bookingId;}
 
     public LocalDate getBookingDate() {return bookingDate;}
-    public void setBookingDate(LocalDate bookingDate) {
-        this.bookingDate = bookingDate;
-    }
+    public void setBookingDate(LocalDate bookingDate) {this.bookingDate = bookingDate;}
 
     public Integer getPriority() {return priority;}
     public void setPriority(Integer priority) {this.priority = priority;}
+
 }

@@ -3,29 +3,28 @@ package eci.edu.back.cvds_back.dto;
 import java.time.LocalDate;
 
 public class UserDTO {
-    private String id;
-    private String username;
-    private int phone;
+    private String userId;
+    private String email;
+    private String password;
+    private String passwordConfirmation;
 
-    public String getId() {
-        return id;
+    public String getUserId() {
+        return userId;
     }
-    public void setId(String id) {
-        this.id = id;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
-
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmail(String email) {
+        this.email = email;
     }
-
-    public int getPhone() {
-        return phone;
+    public String getPassword() {
+        return password;
     }
-    public void setPhone(int phone) {
-        this.phone = phone;
-    }
+    public void setPassword(String password) {this.password = password;}
+    public String getPasswordConfirmation() {return passwordConfirmation;}
+    public void setPasswordConfirmation(String passwordConfirmation) {this.passwordConfirmation = passwordConfirmation;}
 
 }
