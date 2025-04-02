@@ -8,8 +8,12 @@ import java.util.List;
 
 public interface BookingService {
     Booking getBooking(String bookingId) throws BookingServiceException;
-    Booking saveBooking(BookingDTO booking) throws BookingServiceException;
+    Booking saveBooking(BookingDTO bookingDTO) throws BookingServiceException;
     List<Booking> getAllBookings();
+    List<Booking> getBookingsByReservedBy(String userId);
     void deleteBooking(String bookingId) throws BookingServiceException;
-    Booking updateBooking(String bookingId, boolean status) throws BookingServiceException;
+
+    // Métodos actualizados para trabajar con usuarios
+    Booking makeReservation(String bookingId, String userId) throws BookingServiceException;
+    Booking cancelReservation(String bookingId, String userId) throws BookingServiceException;
 }

@@ -46,9 +46,9 @@ public class ModelTests {
 
         // Configuración inicial para pruebas de User
         userDTO = new UserDTO();
-        userDTO.setId("user123");
-        userDTO.setUsername("testuser");
-        userDTO.setPhone(123456789);
+        userDTO.setUserId("user123");
+        userDTO.setEmail("testuser");
+        userDTO.setPassword("123456789");
 
         user = new User(userDTO);
         userList = new ArrayList<>();
@@ -69,7 +69,7 @@ public class ModelTests {
 
     @Test
     void testBookingGettersAndSetters() {
-        Booking booking = new Booking("testId", LocalDate.now(), LocalTime.now(), false, "ClassRoom1", 1);
+        Booking booking = new Booking("testId", LocalDate.now(), LocalTime.now(), false, "ClassRoom1", 1, null);
 
         booking.setBookingId("newId");
         booking.setBookingDate(LocalDate.of(2024, 3, 7));
@@ -82,7 +82,7 @@ public class ModelTests {
         assertEquals(LocalDate.of(2024, 3, 7), booking.getBookingDate());
         assertEquals(LocalTime.of(10, 30), booking.getBookingTime());
         assertTrue(booking.isDisable());
-        assertEquals("ClassRoom1", booking.getBookingClassRoom()); // No cambia porque el setter está vacío
+        assertEquals("ClassRoom2", booking.getBookingClassRoom()); // No cambia porque el setter está vacío
         assertEquals(1, booking.getPriority());
     }
 
@@ -90,36 +90,39 @@ public class ModelTests {
     @Test
     void testUserConstructorWithDTO() {
         UserDTO dto = new UserDTO();
-        dto.setId("testId");
-        dto.setUsername("testUsername");
-        dto.setPhone(123456789);
+        dto.setUserId("testId");
+        dto.setEmail("testUsername");
+        dto.setPassword("123456789");
 
         User user = new User(dto);
 
-        assertEquals("testId", user.getId());
-        assertEquals("testUsername", user.getUsername());
-        assertEquals(123456789, user.getPhone());
+        assertEquals("testId", user.getUserId());
+        assertEquals("testUsername", user.getEmail());
+        assertEquals("123456789", user.getPassword());
     }
 
     @Test
     void testUserConstructorWithParameters() {
-        User user = new User("testId", "testUsername", 123456789);
+        User user = new User("testId", "testUsername", "123456789", "123456789");
 
-        assertEquals("testId", user.getId());
-        assertEquals("testUsername", user.getUsername());
-        assertEquals(123456789, user.getPhone());
+        assertEquals("testId", user.getUserId());
+        assertEquals("testUsername", user.getEmail());
+        assertEquals("123456789", user.getPassword());
+        assertEquals("123456789", user.getPasswordConfirmation());
     }
 
     @Test
     void testUserGettersAndSetters() {
-        User user = new User("testId", "testUsername", 123456789);
+        User user = new User("testId", "testUsername", "123456789", "123456789");
 
-        user.setId("newId");
-        user.setUsername("newUsername");
-        user.setPhone(987654321);
+        user.setUserId("newId");
+        user.setEmail("newUsername");
+        user.setPassword("987654321");
+        user.setPasswordConfirmation("987654321");
 
-        assertEquals("newId", user.getId());
-        assertEquals("newUsername", user.getUsername());
-        assertEquals(987654321, user.getPhone());
+        assertEquals("newId", user.getUserId());
+        assertEquals("newUsername", user.getEmail());
+        assertEquals("987654321", user.getPassword());
+        assertEquals("987654321", user.getPasswordConfirmation());
     }
 }

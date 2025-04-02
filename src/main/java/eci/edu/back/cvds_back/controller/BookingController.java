@@ -4,6 +4,7 @@ import eci.edu.back.cvds_back.config.BookingServiceException;
 import eci.edu.back.cvds_back.dto.BookingDTO;
 import eci.edu.back.cvds_back.model.Booking;
 import eci.edu.back.cvds_back.service.interfaces.BookingService;
+import eci.edu.back.cvds_back.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,68 +17,79 @@ public class BookingController {
     @Autowired
     private BookingService bookingService;
 
-    /**
-     * Retrieves a list of all bookings.
-     * @return List of all bookings.
-     */
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @GetMapping("/bookings")
     public List<Booking> bookings() {
         return bookingService.getAllBookings();
     }
 
-    /**
-     * Retrieves a specific booking by its ID.
-     * @param bookingId The ID of the booking to retrieve.
-     * @return The booking with the specified ID.
-     * @throws BookingServiceException If the booking cannot be retrieved.
-     */
+    @GetMapping("/my-reservations")
+    public List<Booking> myReservations(@RequestHeader("Authorization") String authHeader) {
+        String token = null;
+        String userId = null;
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+            userId = jwtUtil.extractUserId(token);
+        }
+
+        return bookingService.getBookingsByReservedBy(userId);
+    }
+
     @GetMapping("/bookings/{bookingId}")
     public Booking booking(@PathVariable String bookingId) throws BookingServiceException {
         return bookingService.getBooking(bookingId);
     }
 
-    /**
-     * Creates a new booking.
-     * @param booking The BookingDTO object containing booking details.
-     * @return The created booking.
-     * @throws BookingServiceException If the booking cannot be created.
-     */
     @PostMapping("/bookings")
     public Booking booking(@RequestBody BookingDTO booking) throws BookingServiceException {
         return bookingService.saveBooking(booking);
     }
 
-    /**
-     * Deletes a booking by its ID.
-     * @param bookingId The ID of the booking to delete.
-     * @return List of all remaining bookings after deletion.
-     * @throws BookingServiceException If the booking cannot be deleted.
-     */
     @DeleteMapping("/bookings/{bookingId}")
     public List<Booking> deleteBooking(@PathVariable String bookingId) throws BookingServiceException {
         bookingService.deleteBooking(bookingId);
         return bookingService.getAllBookings();
     }
 
-    /**
-     * Marks a booking as reserved.
-     * @param bookingId The ID of the booking to update.
-     * @return The updated booking with reservation status set to false.
-     * @throws BookingServiceException If the booking cannot be updated.
-     */
     @PutMapping("/bookings/make/{bookingId}")
-    public Booking makeBookingReservation(@PathVariable String bookingId) throws BookingServiceException {
-        return bookingService.updateBooking(bookingId, false);
+    public Booking makeBookingReservation(
+            @PathVariable String bookingId,
+            @RequestHeader("Authorization") String authHeader) throws BookingServiceException {
+
+        String token = null;
+        String userId = null;
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+            userId = jwtUtil.extractUserId(token);
+        }
+
+        // Si no hay token o no se pudo extraer el userId, lanzar excepción
+        if (userId == null) {
+            throw new BookingServiceException("Se requiere autenticación para realizar una reserva");
+        }
+
+        // Llamar al servicio con el userId para que lo asocie al hacer la reserva
+        return bookingService.makeReservation(bookingId, userId);
     }
 
-    /**
-     * Cancels a booking reservation.
-     * @param bookingId The ID of the booking to update.
-     * @return The updated booking with reservation status set to true.
-     * @throws BookingServiceException If the booking cannot be updated.
-     */
     @PutMapping("/bookings/cancel/{bookingId}")
-    public Booking cancelBookingReservation(@PathVariable String bookingId) throws BookingServiceException {
-        return bookingService.updateBooking(bookingId, true);
+    public Booking cancelBookingReservation(
+            @PathVariable String bookingId,
+            @RequestHeader("Authorization") String authHeader) throws BookingServiceException {
+
+        String token = null;
+        String userId = null;
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+            userId = jwtUtil.extractUserId(token);
+        }
+
+        // Al cancelar, verificamos que sea el mismo usuario que hizo la reserva o un admin
+        return bookingService.cancelReservation(bookingId, userId);
     }
 }

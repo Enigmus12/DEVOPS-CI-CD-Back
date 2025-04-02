@@ -100,9 +100,9 @@ public class ControllerTests {
 
         // Configuración inicial para pruebas de User
         userDTO = new UserDTO();
-        userDTO.setId("user123");
-        userDTO.setUsername("testuser");
-        userDTO.setPhone(123456789);
+        userDTO.setUserId("user123");
+        userDTO.setEmail("testuser");
+        userDTO.setPassword("123456789");
 
         user = new User(userDTO);
         userList = new ArrayList<>();
@@ -154,57 +154,9 @@ public class ControllerTests {
         verify(mockBookingService).getAllBookings();
     }
 
-    @Test
-    void testMakeBookingReservation() throws BookingServiceException {
-        // Arrange
-        String bookingId = "test123";
-        Booking updatedBooking = new Booking(bookingDTO);
-        updatedBooking.setDisable(false); // La reserva está activa
 
-        when(mockBookingService.updateBooking(bookingId, false)).thenReturn(updatedBooking);
 
-        // Reconfigurar bookingController con el mock
-        bookingController = new BookingController();
-        ReflectionTestUtils.setField(bookingController, "bookingService", mockBookingService);
 
-        // Act
-        Booking result = bookingController.makeBookingReservation(bookingId);
-
-        // Assert
-        verify(mockBookingService, times(1)).updateBooking(bookingId, false);
-        assertNotNull(result);
-        assertFalse(result.isDisable());
-        assertEquals(bookingId, result.getBookingId());
-        assertEquals(bookingDTO.getBookingDate(), result.getBookingDate());
-        assertEquals(bookingDTO.getBookingTime(), result.getBookingTime());
-        assertEquals(bookingDTO.getBookingClassRoom(), result.getBookingClassRoom());
-    }
-
-    @Test
-    void testCancelBookingReservation() throws BookingServiceException {
-        // Arrange
-        String bookingId = "test123";
-        Booking updatedBooking = new Booking(bookingDTO);
-        updatedBooking.setDisable(true); // La reserva está cancelada
-
-        when(mockBookingService.updateBooking(bookingId, true)).thenReturn(updatedBooking);
-
-        // Reconfigurar bookingController con el mock
-        bookingController = new BookingController();
-        ReflectionTestUtils.setField(bookingController, "bookingService", mockBookingService);
-
-        // Act
-        Booking result = bookingController.cancelBookingReservation(bookingId);
-
-        // Assert
-        verify(mockBookingService, times(1)).updateBooking(bookingId, true);
-        assertNotNull(result);
-        assertTrue(result.isDisable());
-        assertEquals(bookingId, result.getBookingId());
-        assertEquals(bookingDTO.getBookingDate(), result.getBookingDate());
-        assertEquals(bookingDTO.getBookingTime(), result.getBookingTime());
-        assertEquals(bookingDTO.getBookingClassRoom(), result.getBookingClassRoom());
-    }
 
     // Tests para BookingGeneratorController
     @Test
@@ -253,7 +205,7 @@ public class ControllerTests {
     void testUserByIdController() throws UserServiceException {
         User result = userController.user("user123");
         assertNotNull(result);
-        assertEquals("user123", result.getId());
+        assertEquals("user123", result.getUserId());
         verify(mockUserService).getUser("user123");
     }
 

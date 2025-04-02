@@ -2,64 +2,29 @@ package eci.edu.back.cvds_back.dto;
 
 import java.time.LocalDate;
 
-/**
- * The UserDTO class represents a Data Transfer Object for user information.
- * It contains basic user details such as ID, username, and phone number.
- */
 public class UserDTO {
-    private String id;
-    private String username;
-    private int phone;
+    private String userId;
+    private String email;
+    private String password;
+    private String passwordConfirmation;
 
-    /**
-     * Retrieves the unique identifier of the user.
-     *
-     * @return the user's unique identifier as a String.
-     */
-    public String getId() {
-        return id;
+    public String getUserId() {
+        return userId;
     }
-    /**
-     * Sets the ID of the user.
-     *
-     * @param id the unique identifier to set for the user
-     */
-    public void setId(String id) {
-        this.id = id;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
-
-    /**
-     * Retrieves the username of the user.
-     *
-     * @return the username as a String.
-     */
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
-    /**
-     * Sets the username for the user.
-     *
-     * @param username the username to set
-     */
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmail(String email) {
+        this.email = email;
     }
-
-    /**
-     * Retrieves the phone number of the user.
-     *
-     * @return the phone number as an integer.
-     */
-    public int getPhone() {
-        return phone;
+    public String getPassword() {
+        return password;
     }
-    /**
-     * Sets the phone number for the user.
-     *
-     * @param phone the phone number to set
-     */
-    public void setPhone(int phone) {
-        this.phone = phone;
-    }
+    public void setPassword(String password) {this.password = password;}
+    public String getPasswordConfirmation() {return passwordConfirmation;}
+    public void setPasswordConfirmation(String passwordConfirmation) {this.passwordConfirmation = passwordConfirmation;}
 
 }
