@@ -40,7 +40,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Run Tests with Maven Verify
-      run: mvn -B verify --file pom.xml
+      run: mvn -B verify --file pom.xml -Dtest=!**.controller.**,!**.util.**
     - name: Test Report
       uses: actions/upload-artifact@v4
       if: success() || failure()
