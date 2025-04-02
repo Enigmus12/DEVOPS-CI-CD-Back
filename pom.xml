@@ -74,6 +74,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
+		
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
@@ -128,7 +129,6 @@
 							<excludes>
 								<exclude>/configurators/</exclude>
 								<exclude>*.import</exclude>
-								<exclude>**/util/*</exclude>
 								<exclude>**/controller/*</exclude>
 							</excludes>
 						</configuration>
