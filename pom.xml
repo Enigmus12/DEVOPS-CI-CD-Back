@@ -134,6 +134,7 @@
 							<excludes>
 								<exclude>/configurators/</exclude>
 								<exclude>*.import</exclude>
+								<exclude>**/util/*</exclude>
 								<exclude>**/controller/*</exclude>
 							</excludes>
 						</configuration>

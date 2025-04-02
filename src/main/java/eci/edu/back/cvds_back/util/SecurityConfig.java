@@ -1,4 +1,4 @@
-package eci.edu.back.cvds_back.controller;
+package eci.edu.back.cvds_back.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

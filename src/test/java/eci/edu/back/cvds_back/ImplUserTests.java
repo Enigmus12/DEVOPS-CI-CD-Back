@@ -2,7 +2,6 @@ package eci.edu.back.cvds_back;
 
 
 import eci.edu.back.cvds_back.config.UserServiceException;
-import eci.edu.back.cvds_back.controller.JwtUtil;
 import eci.edu.back.cvds_back.controller.UserController;
 import eci.edu.back.cvds_back.dto.AuthenticationResponseDTO;
 import eci.edu.back.cvds_back.dto.UserAuthenticationDTO;
@@ -19,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
+import eci.edu.back.cvds_back.util.JwtUtil;
 
 import java.util.ArrayList;
 import java.util.List;

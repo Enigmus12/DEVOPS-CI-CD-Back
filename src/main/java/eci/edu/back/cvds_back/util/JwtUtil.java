@@ -1,4 +1,4 @@
-package eci.edu.back.cvds_back.controller;
+package eci.edu.back.cvds_back.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
