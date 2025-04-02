@@ -126,6 +126,7 @@
 						</goals>
 						<configuration>
 							<excludes>
+								<exclude>eci/edu/back/cvds_back/util/**</exclude>
 								<exclude>/configurators/</exclude>
 								<exclude>*.import</exclude>
 								<exclude>**/util/*</exclude>
