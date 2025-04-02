@@ -4,7 +4,7 @@ import eci.edu.back.cvds_back.config.BookingServiceException;
 import eci.edu.back.cvds_back.dto.BookingDTO;
 import eci.edu.back.cvds_back.model.Booking;
 import eci.edu.back.cvds_back.service.interfaces.BookingService;
-import eci.edu.back.cvds_back.util.JwtUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

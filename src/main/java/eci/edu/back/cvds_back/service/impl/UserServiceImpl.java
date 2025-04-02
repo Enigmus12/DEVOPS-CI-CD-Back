@@ -1,13 +1,14 @@
 package eci.edu.back.cvds_back.service.impl;
 
 import eci.edu.back.cvds_back.config.UserServiceException;
+import eci.edu.back.cvds_back.controller.JwtUtil;
 import eci.edu.back.cvds_back.dto.AuthenticationResponseDTO;
 import eci.edu.back.cvds_back.dto.UserAuthenticationDTO;
 import eci.edu.back.cvds_back.dto.UserDTO;
 import eci.edu.back.cvds_back.model.User;
 import eci.edu.back.cvds_back.service.interfaces.UserRepository;
 import eci.edu.back.cvds_back.service.interfaces.UserService;
-import eci.edu.back.cvds_back.util.JwtUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
