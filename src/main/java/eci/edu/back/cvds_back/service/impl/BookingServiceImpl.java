@@ -11,11 +11,13 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingServiceImpl implements BookingService {
     @Autowired
     private BookingRepository bookingRepository;
+
     @Override
     public Booking getBooking(String bookingId) throws BookingServiceException {
         return bookingRepository.findById(bookingId);
@@ -54,11 +56,17 @@ public class BookingServiceImpl implements BookingService {
         return booking;
     }
 
-
-
     @Override
     public List<Booking> getAllBookings() {
         return bookingRepository.findAll();
+    }
+
+    @Override
+    public List<Booking> getBookingsByReservedBy(String userId) {
+        return bookingRepository.findAll()
+                .stream()
+                .filter(booking -> booking.getReservedBy() != null && booking.getReservedBy().equals(userId))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -67,21 +75,36 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking updateBooking(String bookingId, boolean status) throws BookingServiceException {
+    public Booking makeReservation(String bookingId, String userId) throws BookingServiceException {
         Booking booking = bookingRepository.findById(bookingId);
 
-        if (status && booking.isDisable()) {
-            throw new BookingServiceException("La reserva ya está cancelada.");
-        }
-
-        if (!status && !booking.isDisable()) {
+        if (!booking.isDisable()) {
             throw new BookingServiceException("La reserva ya está activa.");
         }
 
-        booking.setDisable(status);
+        booking.setDisable(false);
+        booking.setReservedBy(userId); // Asignamos el userId a la reserva
         bookingRepository.update(booking);
         return booking;
     }
 
+    @Override
+    public Booking cancelReservation(String bookingId, String userId) throws BookingServiceException {
+        Booking booking = bookingRepository.findById(bookingId);
 
+        if (booking.isDisable()) {
+            throw new BookingServiceException("La reserva ya está cancelada.");
+        }
+
+        // Verificar que el usuario que cancela sea quien hizo la reserva
+        if (booking.getReservedBy() != null && !booking.getReservedBy().equals(userId)) {
+            throw new BookingServiceException("Solo el usuario que realizó la reserva puede cancelarla.");
+        }
+
+        booking.setDisable(true);
+        // Eliminamos el reservedBy para que no quede asociado a ningún usuario
+        booking.setReservedBy(null);
+        bookingRepository.update(booking);
+        return booking;
+    }
 }
