@@ -6,6 +6,21 @@ import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
+/**
+ * Represents a user entity in the system.
+ * This class is annotated with @Document to indicate that it is a MongoDB document
+ * stored in the "users" collection.
+ * 
+ * Each user has the following attributes:
+ * - userId: A unique identifier for the user.
+ * - email: The email address associated with the user.
+ * - password: The password for the user's account.
+ * - passwordConfirmation: A confirmation of the user's password.
+ * 
+ * The class provides constructors for creating a user instance either directly
+ * with its attributes or using a UserDTO object. It also includes getter and setter
+ * methods for accessing and modifying the attributes.
+ */
 @Document(collection = "users")
 public class User {
     @Id
@@ -14,6 +29,14 @@ public class User {
     private String password;
     private String passwordConfirmation;
 
+    /**
+     * Constructs a new User object with the specified details.
+     *
+     * @param userId               The unique identifier for the user.
+     * @param email                The email address of the user.
+     * @param password             The password for the user account.
+     * @param passwordConfirmation The confirmation of the user's password.
+     */
     @PersistenceCreator
     public User(String userId,String email,String password, String passwordConfirmation) {
         this.userId = userId;
@@ -22,6 +45,12 @@ public class User {
         this.passwordConfirmation = passwordConfirmation;
     }
 
+    /**
+     * Constructs a new User object using the provided UserDTO.
+     *
+     * @param userDTO the UserDTO object containing the user details
+     *                such as userId, email, password, and password confirmation.
+     */
     public User(UserDTO userDTO) {
         this.userId = userDTO.getUserId();
         this.email = userDTO.getEmail();
