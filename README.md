@@ -15,6 +15,7 @@ El objetivo de este proyecto es desarrollar un sistema de reservas de laboratori
 
 ## Modelo de Arquitectura Cliente-Servidor
 El sistema sigue el modelo de arquitectura cliente-servidor. El backend está desarrollado con **Spring Boot**, proporcionando una API REST para gestionar las reservas. El frontend se desarrollará con **HTML, JavaScript y CSS**, consumiendo los servicios REST del backend. La base de datos utilizada es **MongoDB Cloud**, donde se almacenan las reservas y la información relevante.
+![image](https://github.com/user-attachments/assets/d51df5c9-800a-4930-a247-d2e061f9b646)
 
 ## Scaffolding del Proyecto
 El proyecto fue generado utilizando **Spring Initializr**, configurado con las siguientes dependencias:
