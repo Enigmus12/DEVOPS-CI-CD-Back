@@ -24,6 +24,7 @@ jobs:
           java-version: '17'
           distribution: 'microsoft'
       - name: Run Tests with Maven Verify
+        shell: bash
         run: mvn -B verify --file pom.xml -DskipTests -DexcludedGroups=controller,util
 
       - name: Build with Maven
