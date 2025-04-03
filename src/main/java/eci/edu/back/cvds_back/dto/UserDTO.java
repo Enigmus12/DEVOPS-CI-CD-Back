@@ -2,6 +2,11 @@ package eci.edu.back.cvds_back.dto;
 
 import java.time.LocalDate;
 
+/**
+ * Data Transfer Object (DTO) for representing a user.
+ * This class is used to encapsulate user-related data and provide
+ * getter and setter methods for accessing and modifying the data.
+ */
 public class UserDTO {
     private String userId;
     private String email;

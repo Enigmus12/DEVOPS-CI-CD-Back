@@ -5,6 +5,10 @@ import eci.edu.back.cvds_back.model.User;
 
 import java.util.List;
 
+/**
+ * Repository interface for managing User entities.
+ * Provides methods for saving, retrieving, and deleting users.
+ */
 public interface UserRepository{
     void save(User user);
     List<User> findAll();
