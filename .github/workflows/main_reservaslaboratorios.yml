@@ -25,10 +25,10 @@ jobs:
           distribution: 'microsoft'
       - name: Run Tests with Maven Verify
         shell: bash
-        run: mvn -B verify --file pom.xml -DskipTests -DexcludedGroups=controller,util
+        run: mvn -B verify --file pom.xml -DexcludedGroups=controller,util
 
       - name: Build with Maven
-        run: mvn clean install
+        run: mvn clean install -DexcludedGroups=controller,util
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
