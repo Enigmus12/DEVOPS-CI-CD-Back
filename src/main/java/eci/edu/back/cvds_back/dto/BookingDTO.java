@@ -7,6 +7,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 
+/**
+ * The BookingDTO class represents a data transfer object for booking information.
+ * It contains details about a booking such as its ID, date, time, classroom, 
+ * priority, and whether it is disabled.
+ */
 public class BookingDTO {
     private String bookingId;
     private LocalDate bookingDate;

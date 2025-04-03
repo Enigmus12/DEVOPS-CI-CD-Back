@@ -5,6 +5,10 @@ import eci.edu.back.cvds_back.model.Booking;
 
 import java.util.List;
 
+/**
+ * Repository interface for managing Booking entities.
+ * Provides methods for saving, retrieving, updating, and deleting bookings.
+ */
 public interface BookingRepository {
     void save(Booking booking);
     List<Booking> findAll();
