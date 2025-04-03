@@ -129,6 +129,7 @@
 								<exclude>/configurators/</exclude>
 								<exclude>*.import</exclude>
 								<exclude>**/controller/*</exclude>
+								<exclude>**/util/*</exclude>
 							</excludes>
 						</configuration>
 					</execution>
