@@ -1,5 +1,10 @@
 package eci.edu.back.cvds_back.dto;
 
+/**
+ * Data Transfer Object (DTO) for user authentication.
+ * This class is used to encapsulate the user's authentication details,
+ * including the user ID and password.
+ */
 public class UserAuthenticationDTO {
 
     private String userId;
